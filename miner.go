@@ -1,6 +1,9 @@
 package loggingdrain
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strconv"
+)
 
 type TemplateMiner struct {
 	drain  *drain
@@ -33,6 +36,7 @@ func (miner *TemplateMiner) UnmarshalJSON(data []byte) error {
 type LogMessageResponse struct {
 	ChangeType    ClusterUpdateType
 	Cluster       *LogCluster
+	TemplateId    string
 	TemplateMined string
 	ClusterCount  int
 }
@@ -82,6 +86,7 @@ func (miner *TemplateMiner) AddLogMessage(message string) *LogMessageResponse {
 	return &LogMessageResponse{
 		ChangeType:    updateType,
 		Cluster:       logCluster,
+		TemplateId:    strconv.FormatInt(logCluster.id, 10),
 		TemplateMined: logCluster.getTemplate(),
 		ClusterCount:  len(miner.drain.idToCluster.Keys()),
 	}

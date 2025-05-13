@@ -111,6 +111,7 @@ func (drain *drain) addLogMessage(message string) (*LogCluster, ClusterUpdateTyp
 	cluster := drain.treeSearch(drain.rootNode, tokens, drain.sim, false)
 	if cluster == nil {
 		drain.clusterCounter += 1
+		// TODO id使用随机唯一id
 		id := drain.clusterCounter
 		cluster = newLogCluster(id, tokens)
 		drain.idToCluster.Add(id, cluster)
