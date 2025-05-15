@@ -41,7 +41,7 @@ type LogMessageResponse struct {
 	ClusterCount  int
 }
 
-func NewTemplateMiner(options ...minerOption) (*TemplateMiner, error) {
+func NewTemplateMiner(options ...MinerOption) (*TemplateMiner, error) {
 	c := newTemplateMinerConfig(options)
 	return newTemplateMinerWithConfig(c)
 }
@@ -58,7 +58,7 @@ func newTemplateMinerWithConfig(config *minerConfig) (*TemplateMiner, error) {
 	}, nil
 }
 
-func newTemplateMinerConfig(options []minerOption) *minerConfig {
+func newTemplateMinerConfig(options []MinerOption) *minerConfig {
 	drainConfig := drainConfig{
 		Depth:       default_max_depth,
 		Similarity:  default_sim,
@@ -97,49 +97,49 @@ func (miner *TemplateMiner) Match(message string) *LogCluster {
 	return miner.drain.match(maskedMessage, SEARCH_STRATEGY_NEVER)
 }
 
-func WithDrainDepth(depth int) minerOption {
+func WithDrainDepth(depth int) MinerOption {
 	return minerOptionFunc(func(conf minerConfig) minerConfig {
 		conf.Drain.Depth = depth
 		return conf
 	})
 }
 
-func WithDrainSim(sim float32) minerOption {
+func WithDrainSim(sim float32) MinerOption {
 	return minerOptionFunc(func(conf minerConfig) minerConfig {
 		conf.Drain.Similarity = sim
 		return conf
 	})
 }
 
-func WithDrainMaxChildren(maxChildren int) minerOption {
+func WithDrainMaxChildren(maxChildren int) MinerOption {
 	return minerOptionFunc(func(conf minerConfig) minerConfig {
 		conf.Drain.MaxChildren = maxChildren
 		return conf
 	})
 }
 
-func WithDrainMaxCluster(maxCluster int) minerOption {
+func WithDrainMaxCluster(maxCluster int) MinerOption {
 	return minerOptionFunc(func(conf minerConfig) minerConfig {
 		conf.Drain.MaxCluster = maxCluster
 		return conf
 	})
 }
 
-func WithMaskPrefix(prefix string) minerOption {
+func WithMaskPrefix(prefix string) MinerOption {
 	return minerOptionFunc(func(conf minerConfig) minerConfig {
 		conf.Mask.Prefix = prefix
 		return conf
 	})
 }
 
-func WithMaskSuffix(suffix string) minerOption {
+func WithMaskSuffix(suffix string) MinerOption {
 	return minerOptionFunc(func(conf minerConfig) minerConfig {
 		conf.Mask.Suffix = suffix
 		return conf
 	})
 }
 
-func WithMaskInsturction(pattern, maskWith string) minerOption {
+func WithMaskInsturction(pattern, maskWith string) MinerOption {
 	return minerOptionFunc(func(conf minerConfig) minerConfig {
 		conf.Mask.MaskInstructions = append(conf.Mask.MaskInstructions, maskInstruction{
 			Pattern:  pattern,
@@ -153,7 +153,7 @@ func (miner *TemplateMiner) Status() string {
 	return miner.drain.status()
 }
 
-type minerOption interface {
+type MinerOption interface {
 	apply(minerConfig) minerConfig
 }
 
