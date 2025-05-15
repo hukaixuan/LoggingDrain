@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	loggingdrain "github.com/palanqu/loggingdrain"
+	loggingdrain "github.com/hukaixuan/loggingdrain"
 )
 
 func main() {

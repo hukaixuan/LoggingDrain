@@ -1,4 +1,4 @@
-module github.com/palanqu/loggingdrain
+module github.com/hukaixuan/loggingdrain
 
 go 1.20
 
