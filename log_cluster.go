@@ -2,6 +2,7 @@ package loggingdrain
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -13,6 +14,18 @@ type LogCluster struct {
 type logClusterMarshalStruct struct {
 	ID                int64
 	LogTemplateTokens []string
+}
+
+func (cluster *LogCluster) ID() int64 {
+	return cluster.id
+}
+
+func (cluster *LogCluster) LogTemplateTokens() []string {
+	return cluster.logTemplateTokens
+}
+
+func (cluster *LogCluster) String() string {
+	return fmt.Sprintf("LogCluster{id: %d, logTemplateTokens: %v}", cluster.id, cluster.logTemplateTokens)
 }
 
 func (cluster *LogCluster) MarshalJSON() ([]byte, error) {
