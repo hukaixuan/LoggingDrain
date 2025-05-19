@@ -2,6 +2,7 @@ package loggingdrain
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 )
 
@@ -90,6 +91,32 @@ func (miner *TemplateMiner) AddLogMessage(message string) *LogMessageResponse {
 		TemplateMined: logCluster.getTemplate(),
 		ClusterCount:  len(miner.drain.idToCluster.Keys()),
 	}
+}
+
+// LoadMinerData 加载miner数据, 不改变配置
+func (miner *TemplateMiner) LoadMinerData(minerData []byte) error {
+	var newMiner *TemplateMiner
+	err := json.Unmarshal(minerData, &newMiner)
+	if err != nil {
+		return err
+	}
+	if newMiner.drain == nil || newMiner.drain.idToCluster == nil {
+		return errors.New("drain is nil or idToCluster is nil")
+	}
+
+	miner.drain.mu.Lock()
+	defer miner.drain.mu.Unlock()
+	// 清空当前数据
+	miner.drain.idToCluster.Purge()
+	miner.drain.rootNode = newRootTreeNode()
+	miner.drain.clusterCounter = 0
+
+	for _, cluster := range newMiner.drain.idToCluster.Values() {
+		miner.drain.clusterCounter++
+		miner.drain.idToCluster.Add(cluster.id, cluster)
+		miner.drain.addSeqToPrefixTree(miner.drain.rootNode, cluster)
+	}
+	return nil
 }
 
 func (miner *TemplateMiner) Match(message string) *LogCluster {
