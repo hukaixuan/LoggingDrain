@@ -39,7 +39,7 @@ type drain struct {
 	maxChildren int
 	maxClusters int
 
-	mu             sync.Mutex
+	mu             sync.RWMutex
 	idToCluster    *lru.Cache[int64, *LogCluster]
 	clusterCounter int64
 	rootNode       *treeNode
@@ -87,7 +87,7 @@ func (drain *drain) UnmarshalJSON(data []byte) error {
 	drain.maxChildren = marshalStruct.MaxChildren
 	drain.maxClusters = marshalStruct.MaxClusters
 	drain.maxDepth = marshalStruct.MaxDepth
-	drain.mu = sync.Mutex{}
+	drain.mu = sync.RWMutex{}
 	drain.rootNode = marshalStruct.RootNode
 	drain.sim = marshalStruct.Sim
 	return nil
@@ -96,6 +96,8 @@ func (drain *drain) UnmarshalJSON(data []byte) error {
 func (drain *drain) status() string {
 	countStr := fmt.Sprintf("cluster count %v", drain.idToCluster.Len())
 
+	drain.mu.RLock()
+	defer drain.mu.RUnlock()
 	clustersStr := []string{}
 	for _, clusterKey := range drain.idToCluster.Keys() {
 		cluster, _ := drain.idToCluster.Get(clusterKey)
@@ -108,6 +110,8 @@ func (drain *drain) status() string {
 
 func (drain *drain) addLogMessage(message string) (*LogCluster, ClusterUpdateType) {
 	tokens := getStringTokens(message)
+	drain.mu.Lock()
+	defer drain.mu.Unlock()
 	cluster := drain.treeSearch(drain.rootNode, tokens, drain.sim, false)
 	if cluster == nil {
 		drain.clusterCounter += 1
@@ -148,6 +152,8 @@ func (drain *drain) addLogMessage(message string) (*LogCluster, ClusterUpdateTyp
 //
 // :return: Matched cluster or None if no match found.
 func (drain *drain) match(content string, strategy SearchStrategy) *LogCluster {
+	drain.mu.RLock()
+	defer drain.mu.RUnlock()
 	tokens := getStringTokens(content)
 	requireSim := float32(1)
 	fullMatch := func() *LogCluster {
