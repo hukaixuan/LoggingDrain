@@ -438,7 +438,7 @@ func newDrainWithConfig(conf drainConfig) *drain {
 		sim:            conf.Similarity,
 		maxChildren:    conf.MaxChildren,
 		maxClusters:    conf.MaxCluster,
-		mu:             sync.Mutex{},
+		mu:             sync.RWMutex{},
 		idToCluster:    l,
 		clusterCounter: 0,
 		rootNode:       newRootTreeNode(),
